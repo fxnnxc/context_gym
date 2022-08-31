@@ -1,32 +1,37 @@
+# https://github.com/openai/gym/blob/master/gym/envs/classic_control/pendulum.py
 
 import gym 
 import numpy as np 
 
-
-
 SAMPLING_NORMAL = {
     "sample" : lambda mean, std : np.random.normal(mean, std),
     "params":{
-        'gravity' : [9.8, 1.0],  # toward downside 
-        'length' : [0.5, 0.25]
+        'LINK_MASS_1' : [1.0, 0.2],
+        'LINK_MASS_2' : [1.0, 0.2],
+        'LINK_LENGTH_1' : [1.0, 0.2],
+        'LINK_LENGTH_2' : [1.0, 0.2],
     }
 }
 SAMPLING_UNIFORM = {
     "sample" : lambda left, right : np.random.uniform(left, right),
     "params":{
-        'gravity' : [1.0, 12.0],  # toward downside 
-        'length' : [0.1, 1.0]
+        'LINK_MASS_1' : [0.1, 2.5],
+        'LINK_MASS_2' : [0.1, 2.5],
+        'LINK_LENGTH_1' : [0.3, 2.5],
+        'LINK_LENGTH_2' : [0.3, 2.5],
     }
 }
 
-class CartPoleWrapper(gym.Wrapper):
+class AcrobotWrapper(gym.Wrapper):
     
     ALL_PARAMS  = {
-        'gravity' : [1.0, 12.0],
-        'length' : [0.1, 1.0]
+        'LINK_MASS_1' : [0.1, 2.5],
+        'LINK_MASS_2' : [0.1, 2.5],
+        'LINK_LENGTH_1' : [0.3, 2.5],
+        'LINK_LENGTH_2' : [0.3, 2.5],
     }
     
-    def __init__(self, env, system_params, history_len, sampling_config='uniform'):
+    def __init__(self, env, system_params, history_len, sampling_config=SAMPLING_UNIFORM):
         super().__init__(env)
         size = env.observation_space.shape if hasattr(env.observation_space, "shape") else tuple(env.observation_space.n)
         self.observation_space = gym.spaces.Dict(
@@ -37,14 +42,8 @@ class CartPoleWrapper(gym.Wrapper):
         )
         self.history = np.zeros((history_len, *size))
         self.system_params = system_params 
-        assert len(set(self.system_params) - set(CartPoleWrapper.ALL_PARAMS.keys())) == 0
-        if sampling_config == "uniform":
-            self.sampling_config = SAMPLING_UNIFORM
-        elif sampling_config == "gaussian":
-            self.sampling_config = SAMPLING_NORMAL
-        else:
-            raise ValueError("{0} is invalid sampling method in [uniform, gaussian]".format(sampling_config))
-                    
+        assert len(set(self.system_params) - set(AcrobotWrapper.ALL_PARAMS.keys())) == 0
+        self.sampling_config = sampling_config
         
         
     def step(self, action):
@@ -72,43 +71,46 @@ class CartPoleWrapper(gym.Wrapper):
         method = self.sampling_config['sample']
         params = self.sampling_config['params']
         
-        INTERVALS = CartPoleWrapper.ALL_PARAMS
-        context = {k : np.clip(method(v[0], v[1]), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()} 
+        INTERVALS = AcrobotWrapper.ALL_PARAMS
+        context = {k : np.clip(method(v[0], v[1]), INTERVALS[k][0], INTERVALS[k][1]) for k,v in params.items()} 
         return context
     
     def set_context(self, context):
         # define how to set environment variables 
-        if "gravity" in self.system_params:
-            self.env.unwrapped.gravity = context['gravity']
-        if 'length' in self.system_params:
-            self.env.unwrapped.length = context['length']
+        if "LINK_MASS_1" in self.system_params:
+            self.env.unwrapped.LINK_MASS_1 = context['LINK_MASS_1']
+        if "LINK_MASS_2" in self.system_params:
+            self.env.unwrapped.LINK_MASS_2 = context['LINK_MASS_2']
+        if "LINK_LENGTH_1" in self.system_params:
+            self.env.unwrapped.LINK_LENGTH_1 = context['LINK_LENGTH_1']
+        if "LINK_LENGTH_2" in self.system_params:
+            self.env.unwrapped.LINK_LENGTH_2 = context['LINK_LENGTH_2']
         
     def get_context(self):
         context = {} 
-        if "gravity" in self.system_params:
-            context['gravity'] = self.env.unwrapped.gravity
-        if 'length' in self.system_params:
-            context['length'] = self.env.unwrapped.length
+        if "LINK_MASS_1" in self.system_params:
+            context['LINK_MASS_1'] = self.env.unwrapped.LINK_MASS_1
+        if "LINK_MASS_2" in self.system_params:
+            context['LINK_MASS_2'] = self.env.unwrapped.LINK_MASS_2
+        if "LINK_LENGTH_1" in self.system_params:
+            context['LINK_LENGTH_1'] = self.env.unwrapped.LINK_LENGTH_1
+        if "LINK_LENGTH_2" in self.system_params:
+            context['LINK_LENGTH_2'] = self.env.unwrapped.LINK_LENGTH_2
         return context 
     
-    
 if __name__ == "__main__":
-    env = CartPoleWrapper(gym.make("CartPole-v1"), ['gravity', 'length'], 3, sampling_config='gaussian')
-    # env = gym.make("CartPole-v1")
-    # print(dir(env.unwrapped))
-    # env.length = 0
+    env = AcrobotWrapper(gym.make("Acrobot-v1"), ['LINK_MASS_1', 'LINK_MASS_2', 'LINK_LENGTH_1', 'LINK_LENGTH_2'], 3,)
     
     for i in range(100):
         done = False         
-        print(env.get_context())
+        env.reset()
         context = env.sample_context()
         env.set_context(context)
-        
-        env.reset()
+        print(env.get_context())
+
         count= 0 
-        while not done:
+        while not done:        
             action = env.action_space.sample()
-            env.tau = None
             ns, r, done, info = env.step(action)
             env.render()
             count +=1 
