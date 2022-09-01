@@ -3,7 +3,7 @@ from context_gym.LunarLander import LunarLanderWrapper
 from context_gym.CartPole import CartPoleWrapper
 from context_gym.Pendulum import PendulumWrapper 
 from context_gym.Acrobot import AcrobotWrapper
-
+import numpy as np 
 
 def make_env(env_id, seed, idx, capture_video, run_name, wrapper=None, system_params=None, history_len=None):
     def thunk():
@@ -15,6 +15,7 @@ def make_env(env_id, seed, idx, capture_video, run_name, wrapper=None, system_pa
         if capture_video:
             if idx == 0:
                 env = gym.wrappers.RecordVideo(env, f"videos/{run_name}")
+        # clip the environment when the agent is ppo
         env.seed(seed)
         env.action_space.seed(seed)
         env.observation_space.seed(seed)
