@@ -5,14 +5,14 @@ import numpy as np
 
 
 SAMPLING_NORMAL = {
-    "sample" : lambda mean, std : np.random.normal(mean, std),
+    "sample" : lambda v : np.random.normal(v[0], v[1]),
     "params":{
         'gravity' : [9.8, 1.0],  # toward downside 
         'length' : [0.5, 0.25]
     }
 }
 SAMPLING_UNIFORM = {
-    "sample" : lambda left, right : np.random.uniform(left, right),
+    "sample" : lambda v : np.random.uniform(v[0], v[1]),
     "params":{
         'gravity' : [1.0, 12.0],  # toward downside 
         'length' : [0.1, 1.0]
@@ -73,7 +73,7 @@ class CartPoleWrapper(gym.Wrapper):
         params = self.sampling_config['params']
         
         INTERVALS = CartPoleWrapper.ALL_PARAMS
-        context = {k : np.clip(method(v[0], v[1]), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()} 
+        context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()} 
         return context
     
     def set_context(self, context):

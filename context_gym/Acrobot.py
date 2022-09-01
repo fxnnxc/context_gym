@@ -4,7 +4,7 @@ import gym
 import numpy as np 
 
 SAMPLING_NORMAL = {
-    "sample" : lambda mean, std : np.random.normal(mean, std),
+    "sample" : lambda v : np.random.normal(v[0], v[1]),
     "params":{
         'LINK_MASS_1' : [1.0, 0.2],
         'LINK_MASS_2' : [1.0, 0.2],
@@ -13,7 +13,7 @@ SAMPLING_NORMAL = {
     }
 }
 SAMPLING_UNIFORM = {
-    "sample" : lambda left, right : np.random.uniform(left, right),
+    "sample" : lambda v : np.random.uniform(v[0], v[1]),
     "params":{
         'LINK_MASS_1' : [0.1, 2.5],
         'LINK_MASS_2' : [0.1, 2.5],
@@ -72,7 +72,7 @@ class AcrobotWrapper(gym.Wrapper):
         params = self.sampling_config['params']
         
         INTERVALS = AcrobotWrapper.ALL_PARAMS
-        context = {k : np.clip(method(v[0], v[1]), INTERVALS[k][0], INTERVALS[k][1]) for k,v in params.items()} 
+        context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1]) for k,v in params.items()} 
         return context
     
     def set_context(self, context):
