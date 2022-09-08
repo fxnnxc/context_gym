@@ -26,7 +26,7 @@ class LunarLanderWrapper(gym.Wrapper):
         'gravity_x' : [-2.0, 2.0],   # toward left and right
     }
     
-    def __init__(self, env, system_params, history_len, sampling_config="uniform"):
+    def __init__(self, env, system_params, history_len, sampling_config=SAMPLING_UNIFORM):
         super().__init__(env)
         size = env.observation_space.shape if hasattr(env.observation_space, "shape") else tuple(env.observation_space.n)
         self.observation_space = gym.spaces.Dict(
@@ -39,13 +39,8 @@ class LunarLanderWrapper(gym.Wrapper):
         self.history = np.zeros((history_len, *size))
         self.system_params = system_params 
         assert len(set(self.system_params) - set(LunarLanderWrapper.ALL_PARAMS.keys())) == 0
-        if sampling_config == "uniform":
-            self.sampling_config = SAMPLING_UNIFORM
-        elif sampling_config == "gaussian":
-            self.sampling_config = SAMPLING_NORMAL
-        else:
-            raise ValueError("{0} is invalid sampling method in [uniform, gaussian]".format(sampling_config))
-            
+        self.sampling_config = sampling_config
+
         
     def step(self, action):
         next_state, reward, done, info = super().step(action)
