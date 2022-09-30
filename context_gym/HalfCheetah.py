@@ -6,25 +6,33 @@ import Box2D
 SAMPLING_NORMAL = {
     "sample" : lambda v : np.random.normal(v[0], v[1]),
     "params":{
-        'gravity_y' : [-9.8, 1.0],  # toward downside 
-        'gravity_x' : [0.0, 1.0]
+        'gravity_z' : [-9.8, 1.0],  # toward downside 
+        'gravity_x' : [0.0, 1.0],
+        'gravity_y' : [0.0, 1.0],
+        'body_mass_1' : [6.36-1.0, 6.36+1.0 ]     
     }
 }
 SAMPLING_UNIFORM = {
     "sample" : lambda v : np.random.uniform(v[0], v[1]),
     "params":{
-        'gravity_y' : [-10.0, -8.0],  # toward downside 
-        'gravity_x' : [-1.0, 1.0]
+        'gravity_z' : [-10.0, -8.0],  # toward downside 
+        'gravity_x' : [-1.0, 1.0],
+        'gravity_y' : [-1.0, 1.0],
+        'body_mass_1' : [6.36-1.0, 6.36+1.0 ]     
     }
 }
 
-class LunarLanderWrapper(gym.Wrapper):
+class HalfCheetahWrapper(gym.Wrapper):
     
     # defines the valid boundary of the system parameters 
     ALL_PARAMS  = {
-        'gravity_y' : [-12.0, 0.0],  # toward downside 
-        'gravity_x' : [-2.0, 2.0],   # toward left and right
+        'gravity_z' : [-12.0, 0.0],  # toward downside 
+        'gravity_x' : [-2.0, 2.0],   # invalid beacuse it moves the robot to direction 
+        'gravity_y' : [-0.0, 0.0],   # invalid beacuse it moves the robot to direction   
+        'body_mass_1' : [6.36-1.0, 6.36+1.0]      
     }
+    #    0, 6.36031332, 1.53524804, 1.58093995, 1.0691906 , 1.42558747, 1.17885117, 0.84986945
+ 
     
     def __init__(self, env, system_params, history_len, sampling_config=SAMPLING_UNIFORM):
         super().__init__(env)
@@ -41,8 +49,17 @@ class LunarLanderWrapper(gym.Wrapper):
         self.history_obs = np.zeros((history_len, *self.size))
         self.history_act = np.zeros((history_len, *self.action_space.shape))
         self.system_params = system_params 
-        assert len(set(self.system_params) - set(LunarLanderWrapper.ALL_PARAMS.keys())) == 0
+        assert len(set(self.system_params) - set(HalfCheetahWrapper.ALL_PARAMS.keys())) == 0
         self.sampling_config = sampling_config
+
+        # -------------------------
+        # store the initial values 
+        self.init_values = {
+            "body_mass": self.env.model.body_mass,
+            "gravity": self.env.model.opt.gravity,
+        }
+        print(self.init_values)
+        # -------------------------
 
         
     def step(self, action):
@@ -76,31 +93,41 @@ class LunarLanderWrapper(gym.Wrapper):
         method = self.sampling_config['sample']
         params = self.sampling_config['params']
         
-        INTERVALS = LunarLanderWrapper.ALL_PARAMS
+        INTERVALS = HalfCheetahWrapper.ALL_PARAMS
         context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()} 
         return context
     
     def set_context(self, context):
         # define how to set environment variables 
-        if "gravity_y" in self.system_params:
-            origin = self.env.unwrapped.world.gravity
-            self.env.unwrapped.world.gravity = (origin[0], context['gravity_y']) # no X gravity
         if "gravity_x" in self.system_params:
-            origin = self.env.unwrapped.world.gravity
-            self.env.unwrapped.world.gravity = (context['gravity_x'], origin[1]) # no X gravity
+            origin = self.env.model.opt.gravity
+            self.env.model.opt.gravity[0] = context['gravity_x']  # no X gravity
+        if "gravity_y" in self.system_params:
+            origin = self.env.model.opt.gravity
+            self.env.model.opt.gravity[1] = context['gravity_y']  # no Y gravity
+        if "gravity_z" in self.system_params:
+            origin = self.env.model.opt.gravity
+            self.env.model.opt.gravity[2] = context['gravity_z']  # no Y gravity
+        if 'body_mass_1' in self.system_params:
+            origin = self.env.model.body_mass
+            self.env.model.body_mass[1] = context['body_mass_1']  # no Y gravity
+        return 
 
     def get_context(self):
         context = {} 
         if "gravity_x" in self.system_params:
-            context['gravity_x'] = self.env.unwrapped.world.gravity[0]     
+            context['gravity_x'] = self.env.model.opt.gravity[0]  
         if "gravity_y" in self.system_params:
-            context['gravity_y'] = self.env.unwrapped.world.gravity[1]     
-
+            context['gravity_y'] = self.env.model.opt.gravity[1]
+        if 'gravity_z' in self.system_params:
+            context['gravity_z'] = self.env.model.opt.gravity[2]     
+        if 'body_mass_1' in self.system_params:
+            context['body_mass_1'] = self.env.model.body_mass[1]
         return context 
     
     
 if __name__ == "__main__":
-    env = LunarLanderWrapper(gym.make("LunarLanderContinuous-v2"), ['gravity_x', 'gravity_y'], 3, sampling_config=SAMPLING_NORMAL)
+    env = HalfCheetahWrapper(gym.make("HalfCheetah-v3"), ['gravity_x', 'gravity_y'], 3, sampling_config=SAMPLING_NORMAL)
     
     for i in range(100):
         done = False         
@@ -116,6 +143,9 @@ if __name__ == "__main__":
             ns, r, done, info = env.step(action)
             # env.render()
             count +=1 
+            print(dir(env.model))
+            print(env.model.body_mass)
+            assert False 
         print(count)
             
 

@@ -12,6 +12,7 @@ SAMPLING_NORMAL = {
         'LINK_LENGTH_2' : [1.0, 0.2],
     }
 }
+
 SAMPLING_UNIFORM = {
     "sample" : lambda v : np.random.uniform(v[0], v[1]),
     "params":{
@@ -109,7 +110,7 @@ class AcrobotWrapper(gym.Wrapper):
         return context 
     
 if __name__ == "__main__":
-    env = AcrobotWrapper(gym.make("Acrobot-v1"), ['LINK_MASS_1', 'LINK_MASS_2', 'LINK_LENGTH_1', 'LINK_LENGTH_2'], 3,)
+    env = AcrobotWrapper(gym.make("Acrobot-v1"), ['LINK_MASS_1', 'LINK_MASS_2', 'LINK_LENGTH_1', 'LINK_LENGTH_2'], 3, )
     
     for i in range(100):
         done = False         
@@ -122,7 +123,7 @@ if __name__ == "__main__":
         while not done:        
             action = env.action_space.sample()
             ns, r, done, info = env.step(action)
-            env.render()
+            # env.render()
             count +=1 
         print(count)
             

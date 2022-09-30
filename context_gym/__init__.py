@@ -3,6 +3,10 @@ from context_gym.LunarLander import LunarLanderWrapper
 from context_gym.CartPole import CartPoleWrapper
 from context_gym.Pendulum import PendulumWrapper 
 from context_gym.Acrobot import AcrobotWrapper
+from context_gym.HalfCheetah import HalfCheetahWrapper
+from context_gym.Ant import AntWrapper
+from context_gym.Hopper import HopperWrapper
+
 import numpy as np 
 
 def make_env(env_id, seed, idx, capture_video, run_name, wrapper=None, system_params=None, history_len=None):
@@ -28,5 +32,7 @@ __ALL__ = [
     LunarLanderWrapper,
     CartPoleWrapper,
     AcrobotWrapper,
-    PendulumWrapper
+    PendulumWrapper,
+    HalfCheetahWrapper,
+    AntWrapper
 ]
