@@ -32,7 +32,7 @@ class CartPoleWrapper(gym.Wrapper):
         self.observation_space = gym.spaces.Dict(
             {"state" : env.observation_space,
              "history_obs" : env.observation_space.__class__(-np.inf, np.inf, (history_len, *self.size)),
-             "history_act" : gym.spaces.Box(-np.inf, np.inf, (history_len, 1)),
+            "history_act" : env.action_space.__class__(-np.inf, np.inf, (history_len, *self.action_space.shape)),
              "context" : gym.spaces.Box(-np.inf, np.inf, (len(system_params), ))
              }
         )
@@ -63,7 +63,8 @@ class CartPoleWrapper(gym.Wrapper):
         state =  super().reset()
         self.prev_state = state 
         self.history_obs = np.zeros((self.history_len, *self.size))
-        self.history_act = np.zeros((self.history_len, 1))
+        self.history_act = np.zeros((self.history_len, *self.action_space.shape))
+    
         state = {
             "state" : state,
             "history_obs" : self.history_obs.copy(),
@@ -183,7 +184,7 @@ class CartPoleContinuousEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
             dtype=np.float32,
         )
 
-        self.action_space = spaces.Box(-1.0, 1.0, shape=(1,))
+        self.action_space = spaces.Box(0.0, 1.0, shape=(2,), dtype=np.float32)
         self.observation_space = spaces.Box(-high, high, dtype=np.float32)
 
         self.screen = None
@@ -198,7 +199,7 @@ class CartPoleContinuousEnv(gym.Env[np.ndarray, Union[int, np.ndarray]]):
         assert self.action_space.contains(action), err_msg
         assert self.state is not None, "Call reset before using step method."
         x, x_dot, theta, theta_dot = self.state
-        force = self.force_mag * action[0]
+        force = - self.force_mag * action[0] + self.force_mag * action[1]
         costheta = math.cos(theta)
         sintheta = math.sin(theta)
 
