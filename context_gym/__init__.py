@@ -7,7 +7,6 @@ from context_gym.HalfCheetah import HalfCheetahWrapper
 from context_gym.Ant import AntWrapper
 from context_gym.Hopper import HopperWrapper
 
-import numpy as np 
 
 def make_env(env_id, seed, idx, capture_video, run_name, wrapper=None, system_params=None, history_len=None):
     def thunk():
@@ -26,13 +25,3 @@ def make_env(env_id, seed, idx, capture_video, run_name, wrapper=None, system_pa
         return env
 
     return thunk
-
-
-__ALL__ = [
-    LunarLanderWrapper,
-    CartPoleWrapper,
-    AcrobotWrapper,
-    PendulumWrapper,
-    HalfCheetahWrapper,
-    AntWrapper
-]

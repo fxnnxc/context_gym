@@ -1,8 +1,0 @@
-{
-    "workbench.colorCustomizations": {
-        "editor.findMatchBackground" :"#000000",
-        "editor.findMatchBorder" :"#ebb8ffa7",
-        "searchEditor.findMatchBackground" :"#ff9090",
-        "editor.rangeHighlightBackground" :"#000000"
-    }
-}
