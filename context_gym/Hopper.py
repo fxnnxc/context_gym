@@ -9,7 +9,7 @@ SAMPLING_NORMAL = {
         'gravity_z' : [-9.8, 1.0],  # toward downside 
         'gravity_x' : [0.0, 1.0],
         'gravity_y' : [0.0, 1.0],
-        'body_mass_1' : [6.36-1.0, 6.36+1.0 ]     
+        'body_mass_1' : [3.5-0.5, 3.5+0.5 ]     
     }
 }
 SAMPLING_UNIFORM = {
@@ -18,7 +18,7 @@ SAMPLING_UNIFORM = {
         'gravity_z' : [-10.0, -8.0],  # toward downside 
         'gravity_x' : [-1.0, 1.0],
         'gravity_y' : [-1.0, 1.0],
-        'body_mass_1' : [6.36-1.0, 6.36+1.0 ]     
+        'body_mass_1' : [3.5-0.5, 3.5+0.5 ]     
     }
 }
 
@@ -29,7 +29,7 @@ class HopperWrapper(gym.Wrapper):
         'gravity_z' : [-12.0, 0.0],  # toward downside 
         'gravity_x' : [-2.0, 2.0],   # invalid beacuse it moves the robot to direction 
         'gravity_y' : [-0.0, 0.0],   # invalid beacuse it moves the robot to direction   
-        'body_mass_1' : [6.36-1.0, 6.36+1.0]      
+        'body_mass_1' : [3.5-0.5, 3.5+0.5]      
     }
     #    0, 6.36031332, 1.53524804, 1.58093995, 1.0691906 , 1.42558747, 1.17885117, 0.84986945
  

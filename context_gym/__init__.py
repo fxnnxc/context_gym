@@ -1,6 +1,6 @@
 import gym 
 from context_gym.LunarLander import LunarLanderWrapper
-from context_gym.CartPole import CartPoleWrapper
+from context_gym.CartPoleContinuous import CartPoleWrapper
 from context_gym.Pendulum import PendulumWrapper 
 from context_gym.Acrobot import AcrobotWrapper
 from context_gym.HalfCheetah import HalfCheetahWrapper
