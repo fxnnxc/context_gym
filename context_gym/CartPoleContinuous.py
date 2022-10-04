@@ -7,15 +7,19 @@ import numpy as np
 SAMPLING_NORMAL = {
     "sample" : lambda v : np.random.normal(v[0], v[1]),
     "params":{
-        'gravity' : [9.8, 1.0],  # toward downside 
-        'length' : [0.5, 0.25]
+        'gravity' : [1.0, 12.0],
+        'length' : [0.1, 1.0],
+        'masscart' : [1.0-0.2, 1.0+0.2],
+        'masspole' : [0.1-0.05, 0.1+0.05],
     }
 }
 SAMPLING_UNIFORM = {
     "sample" : lambda v : np.random.uniform(v[0], v[1]),
     "params":{
-        'gravity' : [1.0, 12.0],  # toward downside 
-        'length' : [0.1, 1.0]
+        'gravity' : [1.0, 12.0],
+        'length' : [0.1, 1.0],
+        'masscart' : [1.0-0.2, 1.0+0.2],
+        'masspole' : [0.1-0.05, 0.1+0.05],
     }
 }
 
@@ -23,7 +27,9 @@ class CartPoleWrapper(gym.Wrapper):
     
     ALL_PARAMS  = {
         'gravity' : [1.0, 12.0],
-        'length' : [0.1, 1.0]
+        'length' : [0.1, 1.0],
+        'masscart' : [1.0-0.2, 1.0+0.2],
+        'masspole' : [0.1-0.05, 0.1+0.05],
     }
     
     def __init__(self, env, system_params, history_len, sampling_config=SAMPLING_UNIFORM):
@@ -88,6 +94,12 @@ class CartPoleWrapper(gym.Wrapper):
             self.env.unwrapped.gravity = context['gravity']
         if 'length' in self.system_params:
             self.env.unwrapped.length = context['length']
+        if 'masspole' in self.system_params:
+            self.env.unwrapped.masspole = context['masspole']
+        if 'masscart' in self.system_params:
+            self.env.unwrapped.masscart = context['masscart']
+        self.env.unwrapped.total_mass = self.env.unwrapped.masspole + self.env.unwrapped.masscart
+        self.env.unwrapped.polemass_length = self.env.unwrapped.masspole * self.env.unwrapped.length
         
     def get_context(self):
         context = {} 
@@ -95,6 +107,10 @@ class CartPoleWrapper(gym.Wrapper):
             context['gravity'] = self.env.unwrapped.gravity
         if 'length' in self.system_params:
             context['length'] = self.env.unwrapped.length
+        if 'masspole' in self.system_params:
+            context['masspole'] = self.env.unwrapped.masspole
+        if 'masscart' in self.system_params:
+            context['masscart'] = self.env.unwrapped.masscart
         return context 
     
 
