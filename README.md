@@ -3,11 +3,18 @@
 
 Simple Domain Randomization using wrapper class
 
+
 ```bash
 pip insatll -e .
 ```
 
----
+
+## Update 
+
+* 🌟 2022.10.06 : added `clip_system_params` (default is `False`) when sampling context
+
+
+
 ## Sampling contex and Setting the context
 
 You can set context by (1) sampling and (2) setting
@@ -17,9 +24,8 @@ context = env.sample_context()
 env.set_context(context) 
 ```
 
----
 
-## Example
+## Python Example
 
 Here is full code for HalfCheetah Environment. 
 For other environments, you can copy and implement the environment
