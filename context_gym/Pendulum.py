@@ -87,7 +87,10 @@ class PendulumWrapper(gym.Wrapper):
         
         if self.clip_system_params:
             INTERVALS = PendulumWrapper.ALL_PARAMS
-            context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()} 
+            context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()}
+        else:
+            context = {k : method(v) for k,v in params.items()} 
+
         return context
     
     def set_context(self, context):
