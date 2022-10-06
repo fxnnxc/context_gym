@@ -32,7 +32,7 @@ class CartPoleWrapper(gym.Wrapper):
         'masspole' : [0.1-0.05, 0.1+0.05],
     }
     
-    def __init__(self, env, system_params, history_len, sampling_config=SAMPLING_UNIFORM):
+    def __init__(self, env, system_params, history_len, sampling_config=SAMPLING_UNIFORM, clip_system_params=False):
         super().__init__(env)
         self.size = env.observation_space.shape if hasattr(env.observation_space, "shape") else tuple(env.observation_space.n)
         self.observation_space = gym.spaces.Dict(
@@ -49,6 +49,7 @@ class CartPoleWrapper(gym.Wrapper):
         self.system_params = system_params 
         assert len(set(self.system_params) - set(CartPoleWrapper.ALL_PARAMS.keys())) == 0
         self.sampling_config = sampling_config
+        self.clip_system_params = clip_system_params
 
         
     def step(self, action):
@@ -84,8 +85,9 @@ class CartPoleWrapper(gym.Wrapper):
         method = self.sampling_config['sample']
         params = self.sampling_config['params']
         
-        INTERVALS = CartPoleWrapper.ALL_PARAMS
-        context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()} 
+        if self.clip_system_params:
+            INTERVALS = CartPoleWrapper.ALL_PARAMS
+            context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()} 
         return context
     
     def set_context(self, context):

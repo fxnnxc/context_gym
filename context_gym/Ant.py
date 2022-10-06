@@ -34,7 +34,7 @@ class AntWrapper(gym.Wrapper):
     #    0, 0.32031332, 1.53524804, 1.58093995, 1.0691906 , 1.42558747, 1.17885117, 0.84986945
  
     
-    def __init__(self, env, system_params, history_len, sampling_config=SAMPLING_UNIFORM):
+    def __init__(self, env, system_params, history_len, sampling_config=SAMPLING_UNIFORM, clip_system_params=False):
         super().__init__(env)
         self.size = env.observation_space.shape if hasattr(env.observation_space, "shape") else tuple(env.observation_space.n)
         self.observation_space = gym.spaces.Dict(
@@ -51,6 +51,7 @@ class AntWrapper(gym.Wrapper):
         self.system_params = system_params 
         assert len(set(self.system_params) - set(AntWrapper.ALL_PARAMS.keys())) == 0
         self.sampling_config = sampling_config
+        self.clip_system_params =clip_system_params
 
         # -------------------------
         # store the initial values 
@@ -92,9 +93,9 @@ class AntWrapper(gym.Wrapper):
         # generate random context
         method = self.sampling_config['sample']
         params = self.sampling_config['params']
-        
-        INTERVALS = AntWrapper.ALL_PARAMS
-        context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()} 
+        if self.clip_system_params:
+            INTERVALS = AntWrapper.ALL_PARAMS
+            context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()} 
         return context
     
     def set_context(self, context):
