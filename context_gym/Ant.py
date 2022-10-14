@@ -9,7 +9,19 @@ SAMPLING_NORMAL = {
         'gravity_z' : [-9.8, 1.0],  # toward downside 
         'gravity_x' : [0.0, 1.0],
         'gravity_y' : [0.0, 1.0],
-        'body_mass_1' : [0.32-0.05, 0.32+0.05 ]     
+        'body_mass_1' : [0.32-0.05, 0.32+0.05],  
+        'body_mass_2' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_3' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_4' : [0.064-0.030, 0.064+0.030],  
+        'body_mass_5' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_6' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_7' : [0.064-0.030, 0.064+0.030],  
+        'body_mass_8' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_9' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_10' : [0.064-0.030, 0.064+0.030],  
+        'body_mass_11' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_12' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_13' : [0.064-0.030, 0.064+0.030],    
     }
 }
 SAMPLING_UNIFORM = {
@@ -18,7 +30,19 @@ SAMPLING_UNIFORM = {
         'gravity_z' : [-10.0, -8.0],  # toward downside 
         'gravity_x' : [-1.0, 1.0],
         'gravity_y' : [-1.0, 1.0],
-        'body_mass_1' : [0.32-0.05, 0.32+0.05 ]     
+        'body_mass_1' : [0.32-0.05, 0.32+0.05],  
+        'body_mass_2' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_3' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_4' : [0.064-0.030, 0.064+0.030],  
+        'body_mass_5' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_6' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_7' : [0.064-0.030, 0.064+0.030],  
+        'body_mass_8' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_9' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_10' : [0.064-0.030, 0.064+0.030],  
+        'body_mass_11' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_12' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_13' : [0.064-0.030, 0.064+0.030],    
     }
 }
 
@@ -29,9 +53,21 @@ class AntWrapper(gym.Wrapper):
         'gravity_z' : [-12.0, 0.0],  # toward downside 
         'gravity_x' : [-2.0, 2.0],   # invalid beacuse it moves the robot to direction 
         'gravity_y' : [-0.0, 0.0],   # invalid beacuse it moves the robot to direction   
-        'body_mass_1' : [0.32-0.05, 0.32+0.05]      
+        'body_mass_1' : [0.32-0.05, 0.32+0.05],  
+        'body_mass_2' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_3' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_4' : [0.064-0.030, 0.064+0.030],  
+        'body_mass_5' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_6' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_7' : [0.064-0.030, 0.064+0.030],  
+        'body_mass_8' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_9' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_10' : [0.064-0.030, 0.064+0.030],  
+        'body_mass_11' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_12' : [0.036-0.015, 0.036+0.015],  
+        'body_mass_13' : [0.064-0.030, 0.064+0.030],  
     }
-    #    0, 0.32031332, 1.53524804, 1.58093995, 1.0691906 , 1.42558747, 1.17885117, 0.84986945
+    #   0.         0.32724923 0.03647693 0.03647693 0.06491138 0.03647693 0.03647693 0.06491138 0.03647693 0.03647693 0.06491138 0.03647693 0.03647693 0.06491138
  
     
     def __init__(self, env, system_params, history_len, sampling_config=SAMPLING_UNIFORM, clip_system_params=False):
@@ -113,9 +149,10 @@ class AntWrapper(gym.Wrapper):
         if "gravity_z" in self.system_params:
             origin = self.env.model.opt.gravity
             self.env.model.opt.gravity[2] = context['gravity_z']  # no Y gravity
-        if 'body_mass_1' in self.system_params:
-            origin = self.env.model.body_mass
-            self.env.model.body_mass[1] = context['body_mass_1']  # no Y gravity
+        for i in range(1, 14):
+            if f'body_mass_{i}' in self.system_params:
+                origin = self.env.model.body_mass
+                self.env.model.body_mass[i] = context[f'body_mass_{i}']  # no Y gravity
         return 
 
     def get_context(self):
@@ -126,8 +163,10 @@ class AntWrapper(gym.Wrapper):
             context['gravity_y'] = self.env.model.opt.gravity[1]
         if 'gravity_z' in self.system_params:
             context['gravity_z'] = self.env.model.opt.gravity[2]     
-        if 'body_mass_1' in self.system_params:
-            context['body_mass_1'] = self.env.model.body_mass[1]
+        for i in range(1, 14):
+            if f'body_mass_{i}' in self.system_params:
+                context[f'body_mass_{i}'] = self.env.model.body_mass[i]
+                
         return context 
     
     

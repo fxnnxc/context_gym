@@ -9,7 +9,13 @@ SAMPLING_NORMAL = {
         'gravity_z' : [-9.8, 1.0],  # toward downside 
         'gravity_x' : [0.0, 1.0],
         'gravity_y' : [0.0, 1.0],
-        'body_mass_1' : [6.36-1.0, 6.36+1.0 ]     
+        'body_mass_1' : [6.36-1.0, 6.36+1.0],      
+        'body_mass_2' : [1.53-0.5, 1.53+0.5],      
+        'body_mass_3' : [1.58-0.5, 1.58+0.5],      
+        'body_mass_4' : [1.06-0.5, 1.06+0.5],      
+        'body_mass_5' : [1.42-0.5, 1.42+0.5],      
+        'body_mass_6' : [1.17-0.5, 1.17+0.5],      
+        'body_mass_7' : [0.84-0.5, 0.84+0.5],   
     }
 }
 SAMPLING_UNIFORM = {
@@ -18,7 +24,13 @@ SAMPLING_UNIFORM = {
         'gravity_z' : [-10.0, -8.0],  # toward downside 
         'gravity_x' : [-1.0, 1.0],
         'gravity_y' : [-1.0, 1.0],
-        'body_mass_1' : [6.36-1.0, 6.36+1.0 ]     
+        'body_mass_1' : [6.36-1.0, 6.36+1.0],      
+        'body_mass_2' : [1.53-0.5, 1.53+0.5],      
+        'body_mass_3' : [1.58-0.5, 1.58+0.5],      
+        'body_mass_4' : [1.06-0.5, 1.06+0.5],      
+        'body_mass_5' : [1.42-0.5, 1.42+0.5],      
+        'body_mass_6' : [1.17-0.5, 1.17+0.5],      
+        'body_mass_7' : [0.84-0.5, 0.84+0.5],  
     }
 }
 
@@ -29,7 +41,13 @@ class HalfCheetahWrapper(gym.Wrapper):
         'gravity_z' : [-12.0, 0.0],  # toward downside 
         'gravity_x' : [-2.0, 2.0],   # invalid beacuse it moves the robot to direction 
         'gravity_y' : [-0.0, 0.0],   # invalid beacuse it moves the robot to direction   
-        'body_mass_1' : [6.36-1.0, 6.36+1.0]      
+        'body_mass_1' : [6.36-1.0, 6.36+1.0],      
+        'body_mass_2' : [1.53-0.5, 1.53+0.5],      
+        'body_mass_3' : [1.58-0.5, 1.58+0.5],      
+        'body_mass_4' : [1.06-0.5, 1.06+0.5],      
+        'body_mass_5' : [1.42-0.5, 1.42+0.5],      
+        'body_mass_6' : [1.17-0.5, 1.17+0.5],      
+        'body_mass_7' : [0.84-0.5, 0.84+0.5],      
     }
     #    0, 6.36031332, 1.53524804, 1.58093995, 1.0691906 , 1.42558747, 1.17885117, 0.84986945
  
@@ -112,9 +130,11 @@ class HalfCheetahWrapper(gym.Wrapper):
         if "gravity_z" in self.system_params:
             origin = self.env.model.opt.gravity
             self.env.model.opt.gravity[2] = context['gravity_z']  # no Y gravity
-        if 'body_mass_1' in self.system_params:
-            origin = self.env.model.body_mass
-            self.env.model.body_mass[1] = context['body_mass_1']  # no Y gravity
+            
+        for i in range(1, 8):
+            if f'body_mass_{i}' in self.system_params:
+                origin = self.env.model.body_mass
+                self.env.model.body_mass[i] = context[f'body_mass_{i}']  # no Y gravity
         return 
 
     def get_context(self):
@@ -127,11 +147,16 @@ class HalfCheetahWrapper(gym.Wrapper):
             context['gravity_z'] = self.env.model.opt.gravity[2]     
         if 'body_mass_1' in self.system_params:
             context['body_mass_1'] = self.env.model.body_mass[1]
+            
+        for i in range(1, 8):
+            if f'body_mass_{i}' in self.system_params:
+                context[f'body_mass_{i}'] = self.env.model.body_mass[i]
+                
         return context 
     
     
 if __name__ == "__main__":
-    env = HalfCheetahWrapper(gym.make("HalfCheetah-v3"), ['gravity_x', 'gravity_y'], 3, sampling_config=SAMPLING_NORMAL)
+    env = HalfCheetahWrapper(gym.make("HalfCheetah-v3"), ['gravity_x', 'gravity_y'] +[f'body_mass_{i}' for i in range(1,8)], 3, sampling_config=SAMPLING_NORMAL)
     
     for i in range(100):
         done = False         
@@ -149,7 +174,7 @@ if __name__ == "__main__":
             count +=1 
             print(dir(env.model))
             print(env.model.body_mass)
-            assert False 
+            # assert False 
         print(count)
             
 
