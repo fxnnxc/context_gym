@@ -2,10 +2,10 @@ import gym
 from context_gym import HopperWrapper
 import numpy as np 
 
-env = HopperWrapper(gym.make("Hopper-v3"), ['gravity_z', 'body_mass_1'], 3)
+env = HopperWrapper(gym.make("Hopper-v3"), list(HopperWrapper.ALL_PARAMS.keys()), 3)
 for context in range(10):
     returns = [] 
-    for i in range(50):
+    for i in range(5):
         done = False         
         returns.append(0)
         env.reset()
