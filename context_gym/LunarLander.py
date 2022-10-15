@@ -102,10 +102,7 @@ class LunarLanderWrapper(gym.Wrapper):
         if "wind_power" in self.system_params:
             self.env.unwrapped.world.wind_power = context['wind_power']
         if "turbulence_power" in self.system_params:
-            self.env.unwrapped.world.wind_power = context['turbulence_power']
-
-
-
+            self.env.unwrapped.world.turbulence_power = context['turbulence_power']
 
     def get_context(self):
         context = {} 
@@ -116,7 +113,7 @@ class LunarLanderWrapper(gym.Wrapper):
         if 'wind_power' in self.system_params:
             context['wind_power'] = self.env.unwrapped.world.wind_power     
         if 'turbulence_power' in self.system_params:
-            context['turbulence_power'] = self.env.unwrapped.world.wind_power     
+            context['turbulence_power'] = self.env.unwrapped.world.turbulence_power     
 
         return context 
     
