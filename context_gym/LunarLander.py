@@ -1,4 +1,4 @@
-
+# https://github.com/openai/gym/blob/master/gym/envs/box2d/lunar_lander.py
 import gym 
 import numpy as np 
 import Box2D
@@ -7,14 +7,18 @@ SAMPLING_NORMAL = {
     "sample" : lambda v : np.random.normal(v[0], v[1]),
     "params":{
         'gravity_y' : [-9.8, 1.0],  # toward downside 
-        'gravity_x' : [0.0, 1.0]
+        'gravity_x' : [0.0, 1.0],
+        'wind_power' : [10, 20],  # wind power original 15
+        'turbulence_power' : [0.5, 2.5] # utbulence power original 1.5
     }
 }
 SAMPLING_UNIFORM = {
     "sample" : lambda v : np.random.uniform(v[0], v[1]),
     "params":{
         'gravity_y' : [-10.0, -8.0],  # toward downside 
-        'gravity_x' : [-1.0, 1.0]
+        'gravity_x' : [-1.0, 1.0],
+        'wind_power' : [10, 20],  # wind power original 15
+        'turbulence_power' : [0.5, 2.5] # utbulence power original 1.5
     }
 }
 
@@ -23,7 +27,9 @@ class LunarLanderWrapper(gym.Wrapper):
     # defines the valid boundary of the system parameters 
     ALL_PARAMS  = {
         'gravity_y' : [-12.0, 0.0],  # toward downside 
-        'gravity_x' : [-2.0, 2.0],   # toward left and right
+        'gravity_x' : [-2.0, 2.0],   # toward left and right,
+        'wind_power' : [10, 20],  # wind power original 15
+        'turbulence_power' : [0.5, 2.5] # utbulence power original 1.5
     }
     
     def __init__(self, env, system_params, history_len, sampling_config=SAMPLING_UNIFORM, clip_system_params=False):
@@ -93,6 +99,13 @@ class LunarLanderWrapper(gym.Wrapper):
         if "gravity_x" in self.system_params:
             origin = self.env.unwrapped.world.gravity
             self.env.unwrapped.world.gravity = (context['gravity_x'], origin[1]) # no X gravity
+        if "wind_power" in self.system_params:
+            self.env.unwrapped.world.wind_power = context['wind_power']
+        if "turbulence_power" in self.system_params:
+            self.env.unwrapped.world.wind_power = context['turbulence_power']
+
+
+
 
     def get_context(self):
         context = {} 
@@ -100,6 +113,10 @@ class LunarLanderWrapper(gym.Wrapper):
             context['gravity_x'] = self.env.unwrapped.world.gravity[0]     
         if "gravity_y" in self.system_params:
             context['gravity_y'] = self.env.unwrapped.world.gravity[1]     
+        if 'wind_power' in self.system_params:
+            context['wind_power'] = self.env.unwrapped.world.wind_power     
+        if 'turbulence_power' in self.system_params:
+            context['turbulence_power'] = self.env.unwrapped.world.wind_power     
 
         return context 
     
