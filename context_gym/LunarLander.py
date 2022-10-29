@@ -1,4 +1,4 @@
-
+# https://github.com/openai/gym/blob/master/gym/envs/box2d/lunar_lander.py
 import gym 
 import numpy as np 
 import Box2D
@@ -10,20 +10,33 @@ SAMPLING_NORMAL = {
     "sample" : lambda v : np.random.normal(v[0], v[1]),
     "params":{
         'gravity_y' : [-9.8, 1.0],  # toward downside 
-        'gravity_x' : [0.0, 1.0]
+        'gravity_x' : [0.0, 1.0],
+        'wind_power' : [10, 20],  # wind power original 15
+        # 'turbulence_power' : [0.5, 2.5] # utbulence power original 1.5
     }
 }
 SAMPLING_UNIFORM = {
     "sample" : lambda v : np.random.uniform(v[0], v[1]),
     "params":{
         'gravity_y' : [-10.0, -8.0],  # toward downside 
-        'gravity_x' : [-1.0, 1.0]
+        'gravity_x' : [-1.0, 1.0],
+        'wind_power' : [10, 20],  # wind power original 15
+        # 'turbulence_power' : [0.5, 2.5] # utbulence power original 1.5
     }
 }
 
 class LunarLanderContinuousWrapper(ContextEnvironment):
     
     # defines the valid boundary of the system parameters 
+<<<<<<< HEAD
+=======
+    ALL_PARAMS  = {
+        'gravity_y' : [-12.0, 0.0],  # toward downside 
+        'gravity_x' : [-2.0, 2.0],   # toward left and right,
+        'wind_power' : [10, 20],  # wind power original 15
+        # 'turbulence_power' : [0.5, 2.5] # utbulence power original 1.5
+    }
+>>>>>>> cd8e7d5249a247d61f7b3db914861b99ba59900a
     
     
     def __init__(self, env, history_len, clip_system_params, normalize_system_params, sampling_config=SAMPLING_UNIFORM):
@@ -45,25 +58,30 @@ class LunarLanderContinuousWrapper(ContextEnvironment):
         if "gravity_x" in self.system_params:
             origin = self.env.unwrapped.world.gravity
             self.env.unwrapped.world.gravity = (context['gravity_x'], origin[1]) # no X gravity
+        if "wind_power" in self.system_params:
+            self.env.unwrapped.world.wind_power = context['wind_power']
 
     def get_context(self):
-        context = {} 
+        context = {}
         if "gravity_x" in self.system_params:
             context['gravity_x'] = self.env.unwrapped.world.gravity[0]     
         if "gravity_y" in self.system_params:
             context['gravity_y'] = self.env.unwrapped.world.gravity[1]     
+        if 'wind_power' in self.system_params:
+            context['wind_power'] = self.env.unwrapped.wind_power     
 
         return context 
     
     
 if __name__ == "__main__":
-    env = LunarLanderWrapper(gym.make("LunarLanderContinuous-v2"), ['gravity_x', 'gravity_y'], 3, sampling_config=SAMPLING_NORMAL)
+    env = LunarLanderWrapper(gym.make("LunarLanderContinuous-v2"), ['gravity_x', 'gravity_y',], 3, sampling_config=SAMPLING_NORMAL)
     
     for i in range(100):
         done = False         
         context = env.sample_context()
-        env.set_context(context)
         print(env.get_context())
+
+        env.set_context(context)
         
         env.reset()
         count= 0 
