@@ -2,6 +2,9 @@
 import gym 
 import numpy as np 
 import Box2D
+from context_gym import ContextEnvironment
+
+
 
 SAMPLING_NORMAL = {
     "sample" : lambda v : np.random.normal(v[0], v[1]),
@@ -46,97 +49,35 @@ SAMPLING_UNIFORM = {
     }
 }
 
-class AntWrapper(gym.Wrapper):
+class AntWrapper(ContextEnvironment):
     
-    # defines the valid boundary of the system parameters 
-    ALL_PARAMS  = {
-        'gravity_z' : [-12.0, 0.0],  # toward downside 
-        'gravity_x' : [-2.0, 2.0],   # invalid beacuse it moves the robot to direction 
-        'gravity_y' : [-0.0, 0.0],   # invalid beacuse it moves the robot to direction   
-        'body_mass_1' : [0.32-0.05, 0.32+0.05],  
-        'body_mass_2' : [0.036-0.015, 0.036+0.015],  
-        'body_mass_3' : [0.036-0.015, 0.036+0.015],  
-        'body_mass_4' : [0.064-0.030, 0.064+0.030],  
-        'body_mass_5' : [0.036-0.015, 0.036+0.015],  
-        'body_mass_6' : [0.036-0.015, 0.036+0.015],  
-        'body_mass_7' : [0.064-0.030, 0.064+0.030],  
-        'body_mass_8' : [0.036-0.015, 0.036+0.015],  
-        'body_mass_9' : [0.036-0.015, 0.036+0.015],  
-        'body_mass_10' : [0.064-0.030, 0.064+0.030],  
-        'body_mass_11' : [0.036-0.015, 0.036+0.015],  
-        'body_mass_12' : [0.036-0.015, 0.036+0.015],  
-        'body_mass_13' : [0.064-0.030, 0.064+0.030],  
-    }
-    #   0.         0.32724923 0.03647693 0.03647693 0.06491138 0.03647693 0.03647693 0.06491138 0.03647693 0.03647693 0.06491138 0.03647693 0.03647693 0.06491138
- 
-    
-    def __init__(self, env, system_params, history_len, sampling_config=SAMPLING_UNIFORM, clip_system_params=False):
-        super().__init__(env)
-        self.size = env.observation_space.shape if hasattr(env.observation_space, "shape") else tuple(env.observation_space.n)
-        self.observation_space = gym.spaces.Dict(
-            {"state" : env.observation_space,
-             "history_obs" : env.observation_space.__class__(-np.inf, np.inf, (history_len, *self.size)),
-             "history_act" : env.action_space.__class__(-np.inf, np.inf, (history_len, *self.action_space.shape)),
-             "context" : gym.spaces.Box(-np.inf, np.inf, (len(system_params), ))
-             }
-        )
-        self.history_len = history_len
-        self.prev_state = None 
-        self.history_obs = np.zeros((history_len, *self.size))
-        self.history_act = np.zeros((history_len, *self.action_space.shape))
-        self.system_params = system_params 
-        assert len(set(self.system_params) - set(AntWrapper.ALL_PARAMS.keys())) == 0
+    def __init__(self, env, history_len, clip_system_params, normalize_system_params, sampling_config=SAMPLING_UNIFORM):
+        self.ALL_PARAMS  = {
+                    'gravity_z' : [-12.0, 0.0],  # toward downside 
+                    'gravity_x' : [-2.0, 2.0],   # invalid beacuse it moves the robot to direction 
+                    'gravity_y' : [-0.0, 0.0],   # invalid beacuse it moves the robot to direction   
+                    'body_mass_1' : [0.32-0.05, 0.32+0.05],  
+                    'body_mass_2' : [0.036-0.015, 0.036+0.015],  
+                    'body_mass_3' : [0.036-0.015, 0.036+0.015],  
+                    'body_mass_4' : [0.064-0.030, 0.064+0.030],  
+                    'body_mass_5' : [0.036-0.015, 0.036+0.015],  
+                    'body_mass_6' : [0.036-0.015, 0.036+0.015],  
+                    'body_mass_7' : [0.064-0.030, 0.064+0.030],  
+                    'body_mass_8' : [0.036-0.015, 0.036+0.015],  
+                    'body_mass_9' : [0.036-0.015, 0.036+0.015],  
+                    'body_mass_10' : [0.064-0.030, 0.064+0.030],  
+                    'body_mass_11' : [0.036-0.015, 0.036+0.015],  
+                    'body_mass_12' : [0.036-0.015, 0.036+0.015],  
+                    'body_mass_13' : [0.064-0.030, 0.064+0.030],  
+                    }
+        self.system_params = list(sampling_config['params'].keys())
         self.sampling_config = sampling_config
-        self.clip_system_params =clip_system_params
-
-        # -------------------------
-        # store the initial values 
-        self.init_values = {
-            "body_mass": self.env.model.body_mass,
-            "gravity": self.env.model.opt.gravity,
-        }
-        print(self.init_values)
-        # -------------------------
-
-        
-    def step(self, action):
-        next_state, reward, done, info = super().step(action)
-
-        self.history_obs = np.concatenate([self.history_obs[1:],  self.prev_state.reshape(1,-1)], axis=0)
-        self.history_act = np.concatenate([self.history_act[1:],  action.reshape(1,-1)], axis=0)
-        dict_state = {
-            "state" : next_state,
-            "history_obs" : self.history_obs.copy(),
-            "history_act" : self.history_act.copy(),
-            "context" : np.array([v for k,v in self.get_context().items()])
-        }
-        self.prev_state = next_state 
-        return dict_state, reward, done, info
-    def reset(self):
-        state =  super().reset()
-        self.prev_state = state 
-        self.history_obs = np.zeros((self.history_len, *self.size))
-        self.history_act = np.zeros((self.history_len, *self.action_space.shape))
-        state = {
-            "state" : state,
-            "history_obs" : self.history_obs.copy(),
-            "history_act" : self.history_act.copy(),
-            "context" : np.array([v for k,v in self.get_context().items()])
-        }
-        return state 
+        super().__init__(env, history_len, clip_system_params, normalize_system_params)
+        assert len(set(self.system_params) - set(self.ALL_PARAMS.keys())) == 0
     
-    def sample_context(self):
-        # generate random context
-        method = self.sampling_config['sample']
-        params = self.sampling_config['params']
-        
-        if self.clip_system_params:
-            INTERVALS = AntWrapper.ALL_PARAMS
-            context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()}
-        else:
-            context = {k : method(v) for k,v in params.items()} 
 
-        return context
+
+       
     
     def set_context(self, context):
         # define how to set environment variables 

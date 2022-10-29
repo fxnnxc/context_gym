@@ -2,7 +2,7 @@ import gym
 from context_gym import HalfCheetahWrapper
 import numpy as np 
 
-env = HalfCheetahWrapper(gym.make("HalfCheetah-v3"), list(HalfCheetahWrapper.ALL_PARAMS.keys()), 3)
+env = HalfCheetahWrapper(gym.make("HalfCheetah-v3"), 3, True, True)
 for context in range(10):
     returns = [] 
     for i in range(5):
@@ -12,7 +12,7 @@ for context in range(10):
         count= 0 
         while not done:
             action = env.action_space.sample()
-            action = np.array([0,0,0,0,0,0])
+            # action = np.array([0,0,0,0,0,0])
             env.tau = None
             ns, r, done, info = env.step(action)
             # env.render()

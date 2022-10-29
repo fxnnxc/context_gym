@@ -1,8 +1,8 @@
 import gym 
-from context_gym import HopperWrapper
+from context_gym import LunarLanderContinuousWrapper
 import numpy as np 
 
-env = HopperWrapper(gym.make("Hopper-v3"), 3, True, True)
+env = LunarLanderContinuousWrapper(gym.make("LunarLanderContinuous-v2"), 3, True, True)
 for context in range(10):
     returns = [] 
     for i in range(5):

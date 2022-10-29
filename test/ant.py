@@ -2,7 +2,7 @@ import gym
 from context_gym import AntWrapper
 import numpy as np 
 
-env = AntWrapper(gym.make("Ant-v3"), list(AntWrapper.ALL_PARAMS.keys()), 3)
+env = AntWrapper(gym.make("Ant-v3"), 3, True, True)
 for context in range(10):
     returns = [] 
     for i in range(5):
