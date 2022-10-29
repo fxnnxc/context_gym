@@ -29,11 +29,13 @@ class ContextEnvironment(gym.Wrapper):
         if self.clip_system_params:
             INTERVALS = self.ALL_PARAMS
             context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()}
-        elif self.normalize_system_params:
-            INTERVALS = self.ALL_PARAMS
-            context = {k : (method(v)-INTERVALS[k][0])/(INTERVALS[k][1] - INTERVALS[k][0])    for k,v in params.items()}
         else:
             context = {k : method(v) for k,v in params.items()} 
+
+        if self.normalize_system_params:
+            INTERVALS = params
+            context = {k : (v - INTERVALS[k][0])/(INTERVALS[k][1] - INTERVALS[k][0])    for k,v in context.items()}
+            print(context)
 
         return context
     
@@ -61,16 +63,3 @@ class ContextEnvironment(gym.Wrapper):
             "context" : np.array([v for k,v in self.get_context().items()])
         }
         return state 
-    
-    def sample_context(self):
-        # generate random context
-        method = self.sampling_config['sample']
-        params = self.sampling_config['params']
-        
-        if self.clip_system_params:
-            INTERVALS = self.ALL_PARAMS
-            context = {k : np.clip(method(v), INTERVALS[k][0], INTERVALS[k][1])    for k,v in params.items()}
-        else:
-            context = {k : method(v) for k,v in params.items()} 
-
-        return context
