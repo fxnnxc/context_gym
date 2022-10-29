@@ -11,7 +11,7 @@ SAMPLING_NORMAL = {
     "params":{
         'gravity_y' : [-9.8, 1.0],  # toward downside 
         'gravity_x' : [0.0, 1.0],
-        'wind_power' : [10, 20],  # wind power original 15
+        # 'wind_power' : [10, 20],  # wind power original 15
         # 'turbulence_power' : [0.5, 2.5] # utbulence power original 1.5
     }
 }
@@ -20,23 +20,12 @@ SAMPLING_UNIFORM = {
     "params":{
         'gravity_y' : [-10.0, -8.0],  # toward downside 
         'gravity_x' : [-1.0, 1.0],
-        'wind_power' : [10, 20],  # wind power original 15
+        # 'wind_power' : [10, 20],  # wind power original 15
         # 'turbulence_power' : [0.5, 2.5] # utbulence power original 1.5
     }
 }
 
 class LunarLanderContinuousWrapper(ContextEnvironment):
-    
-    # defines the valid boundary of the system parameters 
-<<<<<<< HEAD
-=======
-    ALL_PARAMS  = {
-        'gravity_y' : [-12.0, 0.0],  # toward downside 
-        'gravity_x' : [-2.0, 2.0],   # toward left and right,
-        'wind_power' : [10, 20],  # wind power original 15
-        # 'turbulence_power' : [0.5, 2.5] # utbulence power original 1.5
-    }
->>>>>>> cd8e7d5249a247d61f7b3db914861b99ba59900a
     
     
     def __init__(self, env, history_len, clip_system_params, normalize_system_params, sampling_config=SAMPLING_UNIFORM):
