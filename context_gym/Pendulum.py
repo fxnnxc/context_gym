@@ -46,6 +46,10 @@ class PendulumWrapper(ContextEnvironment):
 
     
     def set_context(self, context):
+        if self.normalize_system_params:
+            # recover the context
+            INTERVALS = self.sampling_config['params']
+            context = {k : INTERVALS[k][0] + v *  (INTERVALS[k][1] - INTERVALS[k][0])    for k,v in context.items()}
         # define how to set environment variables 
         if "gravity" in self.system_params:
             self.env.unwrapped.g = context['gravity']
